@@ -1,4 +1,4 @@
-use std::{ffi::{CString, c_char}, fs::File, io::ErrorKind, ptr::null_mut};
+use std::{ffi::{CString, c_char, CStr}, fs::File, io::ErrorKind, ptr::null_mut};
 use symphonia::core::{audio::Signal, errors::Error};
 use symphonia::core::{formats::{FormatOptions, Track}};
 use symphonia::core::io::MediaSourceStream;
@@ -186,6 +186,56 @@ impl FileTranscoder {
         let (reader, track) = FileLoader::load(input)?;
         FileTranscoder::transcode(&track, reader, output)?;
         Ok(())
+    }
+}
+
+#[unsafe(no_mangle)]
+extern "C" fn convert_audio_to_ogg(input: *const c_char, output: *const c_char) -> FfiMessage {
+    if input.is_null() {
+        return FfiMessage::fail("Input path pointer is NULL".to_string());
+    }
+    if output.is_null() {
+        return FfiMessage::fail("Output path pointer is NULL".to_string());
+    }
+
+    let input_str = unsafe {
+        match CStr::from_ptr(input).to_str() {
+            Ok(s) => s,
+            Err(_) => return FfiMessage::fail("Input path is not valid UTF-8".to_string()),
+        }
+    };
+
+    let output_str = unsafe {
+        match CStr::from_ptr(output).to_str() {
+            Ok(s) => s,
+            Err(_) => return FfiMessage::fail("Output path is not valid UTF-8".to_string()),
+        }
+    };
+
+    match FileTranscoder::perform_pipeline(input_str, output_str) {
+        Ok(_) => FfiMessage::ok(),
+        Err(e) => {
+            let error_msg = match e {
+                ConversionError::FileNotFound(path) => format!("File not found: {}", path),
+                ConversionError::IoError(msg) => format!("IO Error: {}", msg),
+                ConversionError::UnsupportedFormat(msg) => format!("Format Error: {}", msg),
+                ConversionError::DecodeError(msg) => format!("Decoding Error: {}", msg),
+                ConversionError::EncodeError(msg) => format!("Encoding Error: {}", msg),
+                ConversionError::SystemError(msg) => format!("System Error: {}", msg),
+            };
+            FfiMessage::fail(error_msg)
+        }
+    }
+}
+
+//free the error message memory
+#[unsafe(no_mangle)]
+pub extern "C" fn free_ffi_message_error(ptr: *mut c_char) {
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        let _ = CString::from_raw(ptr); 
     }
 }
 
