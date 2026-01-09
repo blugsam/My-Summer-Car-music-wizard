@@ -108,7 +108,7 @@ impl FileTranscoder {
         let channels = codec_params.channels.ok_or(ConversionError::UnsupportedFormat("Unknown channel count".to_string()))?.count();
 
         let output_file_result = File::create(output_path);
-        let mut output_file = match output_file_result {
+        let output_file = match output_file_result {
             Ok(output_file_result) => output_file_result,
             Err(error) => return Err(ConversionError::IoError(error.to_string()))
         };
@@ -242,9 +242,8 @@ pub extern "C" fn free_ffi_message_error(ptr: *mut c_char) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::error;
     use std::fs;
-    use std::path::{Path, PathBuf};
+    use std::path::{PathBuf};
 
     #[test]
     fn test_file_finding_on_success() {
