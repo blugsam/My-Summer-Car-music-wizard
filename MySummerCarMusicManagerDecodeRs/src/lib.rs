@@ -228,7 +228,7 @@ extern "C" fn convert_audio_to_ogg(input: *const c_char, output: *const c_char) 
     }
 }
 
-//free the error message memory
+//free the error message from memory
 #[unsafe(no_mangle)]
 pub extern "C" fn free_ffi_message_error(ptr: *mut c_char) {
     if ptr.is_null() {

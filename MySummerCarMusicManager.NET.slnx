@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="MySummerCarMusicManager.Application/MySummerCarMusicManager.Application.csproj" Id="aaf72f19-1c34-4958-b115-61103a6ff488" />
+  <Project Path="MySummerCarMusicManager.Domain/MySummerCarMusicManager.Domain.csproj" Id="30baf993-b554-4540-9aa5-0ff69928dab4" />
+  <Project Path="MySummerCarMusicManager.Infrastructure/MySummerCarMusicManager.Infrastructure.csproj" Id="e0383309-f2b8-478a-b600-ff790630d4f8" />
   <Project Path="MySummerCarMusicManager.NET.Desktop/MySummerCarMusicManager.NET.Desktop.csproj" />
   <Project Path="MySummerCarMusicManager.NET/MySummerCarMusicManager.NET.csproj" />
 </Solution>
