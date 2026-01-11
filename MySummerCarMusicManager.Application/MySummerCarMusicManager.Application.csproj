@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MySummerCarMusicManager.Domain\MySummerCarMusicManager.Domain.csproj" />
+    <ProjectReference Include="..\MySummerCarMusicManager.Infrastructure\MySummerCarMusicManager.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
