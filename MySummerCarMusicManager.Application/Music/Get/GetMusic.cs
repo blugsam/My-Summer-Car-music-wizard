@@ -2,7 +2,7 @@
 
 namespace MySummerCarMusicManager.Application.Music.Get;
 
-public sealed class GetMusic(IFileReader fileReader, IMetadataReader metadataReader)
+public sealed class GetMusic(IFileSystem fileReader, IMetadataReader metadataReader)
 {
     public async Task<List<Domain.Music>> Handle(string folderPath, CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ public sealed class GetMusic(IFileReader fileReader, IMetadataReader metadataRea
 
     private async Task<List<Domain.Music>> LoadTracksFromDisk(string folderPath, CancellationToken cancellationToken)
     {
-        var files = fileReader.ReadAudioFiles(folderPath).ToList();
+        var files = fileReader.GetFiles(folderPath).ToList();
 
         if (files.Count == 0) return new List<Domain.Music>();
 

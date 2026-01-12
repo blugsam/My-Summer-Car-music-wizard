@@ -2,5 +2,5 @@
 
 public interface IAudioTranscoder
 {
-    public void TranscodeToOggAsync(string input, string output);
+    public void Transcode(string input, string output);
 }
