@@ -1,6 +1,6 @@
 ﻿using MySummerCarMusicManager.Infrastructure.Interop;
 
-namespace MySummerCarMusicManager.Infrastructure.Transcoder;
+namespace MySummerCarMusicManager.Infrastructure.DataAccess;
 
 internal sealed class AudioTranscoder(IRustInteropHandler rustInteropHandler) : IAudioTranscoder
 {

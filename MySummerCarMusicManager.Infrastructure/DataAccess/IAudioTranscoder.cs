@@ -1,4 +1,4 @@
-﻿namespace MySummerCarMusicManager.Infrastructure.Transcoder;
+﻿namespace MySummerCarMusicManager.Infrastructure.DataAccess;
 
 public interface IAudioTranscoder
 {

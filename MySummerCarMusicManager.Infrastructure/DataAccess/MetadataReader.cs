@@ -2,32 +2,18 @@
 
 internal sealed class MetadataReader : IMetadataReader
 {
-    public AudioMetadata? ReadMetadata(string path)
+    public AudioMetadata? ReadMetadata(string sourcePath)
     {
-        if (string.IsNullOrEmpty(path)) return null;
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            throw new ArgumentNullException(nameof(sourcePath), "The folder path's empty.");
 
-        try
-        {
-            using var file = TagLib.File.Create(path);
+        using var file = TagLib.File.Create(sourcePath);
 
-            var title = file.Tag.Title ?? null!;
-            var artists = file.Tag.Performers ?? null!;
-            var duration = file.Properties.Duration;
+        var title = file.Tag.Title;
+        var artists = file.Tag.Performers ?? Array.Empty<string>();
+        var duration = file.Properties.Duration;
 
-            return new AudioMetadata(title, artists, duration);
-        }
-        catch (TagLib.CorruptFileException)
-        {
-            return null;
-        }
-        catch (IOException)
-        {
-            return null;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        return new AudioMetadata(title, artists, duration);
     }
 }
 

@@ -1,60 +1,52 @@
 ﻿namespace MySummerCarMusicManager.Infrastructure.DataAccess;
 
-public sealed class FileSystem : IFileSystem
+internal sealed class FileSystem : IFileSystem
 {
-    private static readonly HashSet<string> _supportedFormats = new HashSet<string> { "mp3", "wav", "flac", "m4a", "aac", "wma" };
-
-    public IEnumerable<string> GetFiles(string folderPath, string pattern = "Track*.ogg")
+    public IEnumerable<string> GetFiles(string filesPath, string pattern = "Track*.ogg")
     {
-        if (string.IsNullOrWhiteSpace(folderPath))
-            throw new ArgumentException("The folder path's empty.", nameof(folderPath));
+        if (string.IsNullOrWhiteSpace(filesPath))
+            throw new ArgumentNullException(nameof(filesPath), "The folder path's empty.");
 
-        return Directory.EnumerateFiles(folderPath, pattern)
-            .Where(filePath =>
-            {
-                var extension = Path.GetExtension(filePath);
-
-                return !string.IsNullOrEmpty(extension) && _supportedFormats.Contains(extension);
-            });
+        return Directory.EnumerateFiles(filesPath, pattern, SearchOption.TopDirectoryOnly);
     }
 
-    public void MoveFile(string sourcePath, string destinationPath)
+    public void MoveFile(string filePath, string destinationPath)
     {
-        if (string.IsNullOrWhiteSpace(sourcePath))
-            throw new ArgumentException("Source path is empty.", nameof(sourcePath));
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentNullException(nameof(filePath), "Source path is empty.");
 
         if (string.IsNullOrWhiteSpace(destinationPath))
-            throw new ArgumentException("Destination path is empty.", nameof(destinationPath));
+            throw new ArgumentNullException(nameof(destinationPath), "Destination path is empty.");
 
-        File.Move(sourcePath, destinationPath);
+        File.Move(filePath, destinationPath);
     }
 
-    public void CopyFile(string sourcePath, string destinationPath, bool overwrite = false)
+    public void CopyFile(string filePath, string destinationPath, bool overwrite = false)
     {
-        if (string.IsNullOrWhiteSpace(sourcePath))
-            throw new ArgumentException("Source path is empty.", nameof(sourcePath));
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentNullException(nameof(filePath), "Source path is empty.");
 
         if (string.IsNullOrWhiteSpace(destinationPath))
-            throw new ArgumentException("Destination path is empty.", nameof(destinationPath));
+            throw new ArgumentNullException(nameof(destinationPath), "Destination path is empty.");
 
-        File.Copy(sourcePath, destinationPath, overwrite);
+        File.Copy(filePath, destinationPath, overwrite);
     }
 
-    public void DeleteFile(string folderPath)
+    public void DeleteFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(folderPath))
-            throw new ArgumentException("Source path is empty.", nameof(folderPath));
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentNullException(nameof(filePath), "Source path is empty.");
 
-        if (!File.Exists(folderPath))
-            throw new FileNotFoundException("File not found", folderPath);
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("File not found.", filePath);
 
-        File.Delete(folderPath);
+        File.Delete(filePath);
     }
 
     public void CreateFolder(string folderPath)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
-            throw new ArgumentException("Folder path is empty.", nameof(folderPath));
+            throw new ArgumentNullException(nameof(folderPath), "Folder path is empty.");
 
         Directory.CreateDirectory(folderPath);
     }
@@ -62,8 +54,40 @@ public sealed class FileSystem : IFileSystem
     public void DeleteFolder(string folderPath, bool isRecursive)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
-            throw new ArgumentException("Folder path is empty.", nameof(folderPath));
+            throw new ArgumentNullException(nameof(folderPath), "Folder path is empty.");
 
         Directory.Delete(folderPath, isRecursive);
+    }
+
+    public void WriteText(string filePath, string content)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentNullException(nameof(filePath), "Folder path is empty.");
+
+        File.WriteAllText(filePath, content);
+    }
+
+    public string ReadText(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("File not found.", filePath);
+
+        return File.ReadAllText(filePath);
+    }
+
+    public bool IsFileExists(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentNullException(nameof(filePath), "Folder path is empty.");
+
+        return File.Exists(filePath);
+    }
+
+    public bool IsDirectoryExists(string folderPath)
+    {
+        if (string.IsNullOrWhiteSpace(folderPath))
+            throw new ArgumentNullException(nameof(folderPath), "Folder path is empty.");
+
+        return File.Exists(folderPath);
     }
 }

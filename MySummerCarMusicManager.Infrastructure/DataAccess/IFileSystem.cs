@@ -8,4 +8,8 @@ public interface IFileSystem
     void DeleteFile(string sourcePath);
     void CreateFolder(string folderPath);
     void DeleteFolder(string folderPath, bool isRecursive);
+    void WriteText(string path, string content);
+    string ReadText(string path);
+    bool IsFileExists(string folderPath);
+    bool IsDirectoryExists(string folderPath);
 }

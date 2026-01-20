@@ -5,7 +5,7 @@ namespace MySummerCarMusicManager.NET.Interop;
 
 internal sealed partial class RustInteropHandler : IRustInteropHandler
 {
-    private const string DLL_NAME = "audio_transcoder.dll";
+    private const string DLL_NAME = "decode_rs.dll";
 
     [LibraryImport(DLL_NAME, EntryPoint = "convert_audio_to_ogg", StringMarshalling = StringMarshalling.Utf8)]
     private static partial FfiMessage ConvertAudioToOgg(string input, string output);
