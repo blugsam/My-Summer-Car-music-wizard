@@ -29,10 +29,10 @@ public partial class LauncherViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isGameSelectionStep = true;
 
-    public ObservableCollection<NavigationItem> Items { get; } = [];
+    public ObservableCollection<IDisplayItem> Items { get; } = [];
 
     [ObservableProperty]
-    private NavigationItem? _selectedItem;
+    private IDisplayItem? _selectedItem;
 
     private Game? _selectedGame;
     private string _currentRootPath = string.Empty;
@@ -45,6 +45,8 @@ public partial class LauncherViewModel : ViewModelBase
     {
         _gameCatalog = gameCatalog;
         _fileSystem = fileSystem;
+
+        ShowGameSelection();
     }
 
     public void SetKnownPaths(Dictionary<string, string> paths)
@@ -67,7 +69,7 @@ public partial class LauncherViewModel : ViewModelBase
 
         foreach (var game in _gameCatalog.GetSupportedGames())
         {
-            Items.Add(new NavigationItem(game, game.Name, game.IconName));
+            Items.Add(game);
         }
     }
 
@@ -82,7 +84,7 @@ public partial class LauncherViewModel : ViewModelBase
 
         foreach (var playlist in game.Playlists)
         {
-            Items.Add(new NavigationItem(playlist, playlist.Name, playlist.IconName));
+            Items.Add(playlist);
         }
     }
 
@@ -90,7 +92,7 @@ public partial class LauncherViewModel : ViewModelBase
     [RelayCommand]
     private async Task NextStep(object? parameter)
     {
-        await (SelectedItem?.Model switch
+        await (SelectedItem switch
         {
             Game game => OnGameSelectedAsync(game, parameter),
             Playlist playlist => OnPlaylistSelectedAsync(playlist),

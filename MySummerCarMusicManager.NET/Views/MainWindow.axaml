@@ -1,12 +1,26 @@
-<Window xmlns="https://github.com/avaloniaui"
+<ClassicWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:MySummerCarMusicManager.NET.Views"
+        xmlns:classic="using:Avalonia.Classic.Theme"
         xmlns:vm="using:MySummerCarMusicManager.NET.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:views="clr-namespace:MySummerCarMusicManager.NET.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="MySummerCarMusicManager.NET.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="MySummerCarMusicManager.NET">
-        <views:MainView />
-</Window>
+        Title="MSC Music Wizard"
+        Width="800" Height="450">
+
+    <ContentControl Content="{Binding CurrentView}">
+        <ContentControl.DataTemplates>
+            
+            <DataTemplate DataType="{x:Type vm:LauncherViewModel}">
+                <views:LauncherView />
+            </DataTemplate>
+            
+<!--            <DataTemplate DataType="{x:Type vm:EditorViewModel}">
+                <views:MainView /> 
+            </DataTemplate>-->
+
+        </ContentControl.DataTemplates>
+    </ContentControl>
+    
+</ClassicWindow>
+
+<!--ClassicWindow.SmallIcon="../Icons/midi_bl-16.png"-->

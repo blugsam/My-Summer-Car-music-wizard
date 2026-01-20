@@ -1,6 +1,6 @@
 ﻿namespace MySummerCarMusicManager.Domain;
 
-public sealed record Game
+public sealed record Game : IDisplayItem
 {
     public string Id { get; }
     public string Name { get; }
@@ -25,7 +25,7 @@ public sealed record Game
             new("CD3",   "CD3",   "cd")
         };
 
-        return new Game("msc", "My Summer Car", "msc", playlists);
+        return new Game("MSC", "My Summer Car", "msc", playlists);
     }
 
     public static Game CreateMyWinterCar()
@@ -38,6 +38,6 @@ public sealed record Game
             new("CD3",   "CD3",   "cd")
         };
 
-        return new Game("mwc", "My Winter Car", "mwc", playlists);
+        return new Game("MWC", "My Winter Car", "mwc", playlists);
     }
 }

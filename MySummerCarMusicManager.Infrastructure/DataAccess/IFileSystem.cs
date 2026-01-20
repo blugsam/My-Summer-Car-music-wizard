@@ -11,5 +11,5 @@ public interface IFileSystem
     void WriteText(string path, string content);
     string ReadText(string path);
     bool IsFileExists(string folderPath);
-    bool IsDirectoryExists(string folderPath);
+    bool IsFolderExists(string folderPath);
 }

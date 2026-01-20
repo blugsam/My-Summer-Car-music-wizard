@@ -51,7 +51,7 @@ internal sealed class SettingsSaver : ISettingsSaver
     public void Save()
     {
         var dir = Path.GetDirectoryName(_filePath);
-        if (dir != null && !_fileSystem.IsDirectoryExists(dir))
+        if (dir != null && !_fileSystem.IsFolderExists(dir))
         {
             _fileSystem.CreateFolder(dir);
         }

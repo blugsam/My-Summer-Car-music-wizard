@@ -11,13 +11,39 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Icons\CD-16.png" />
+    <None Remove="Icons\CD-32.png" />
+    <None Remove="Icons\Finnish_flag_by_ilyushka88.jpg" />
+    <None Remove="Icons\MSC-16.png" />
+    <None Remove="Icons\MSC-32.png" />
+    <None Remove="Icons\MWC-16.png" />
+    <None Remove="Icons\MWC-32.png" />
+    <None Remove="Icons\Radio-16.png" />
+    <None Remove="Icons\Radio-32.png" />
+    <AvaloniaResource Include="Icons\cd-16.png" />
+    <AvaloniaResource Include="Icons\cd-32.png" />
+    <AvaloniaResource Include="Icons\Finnish_flag_by_ilyushka88.jpg" />
+    <AvaloniaResource Include="Icons\MSC-16.png" />
+    <AvaloniaResource Include="Icons\MSC-32.png" />
+    <AvaloniaResource Include="Icons\MWC-16.png" />
+    <AvaloniaResource Include="Icons\MWC-32.png" />
+    <AvaloniaResource Include="Icons\radio-16.png" />
+    <AvaloniaResource Include="Icons\radio-32.png" />
     <PackageReference Include="Avalonia" Version="11.3.10" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.10" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.10" />
     <PackageReference Include="Classic.Avalonia.Theme" Version="11.3.0.3" />
+    <PackageReference Include="Classic.Avalonia.Theme.DataGrid" Version="11.3.0.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MySummerCarMusicManager.App\MySummerCarMusicManager.App.csproj" />
+    <ProjectReference Include="..\MySummerCarMusicManager.Domain\MySummerCarMusicManager.Domain.csproj" />
+    <ProjectReference Include="..\MySummerCarMusicManager.Infrastructure\MySummerCarMusicManager.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

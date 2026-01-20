@@ -83,7 +83,7 @@ internal sealed class FileSystem : IFileSystem
         return File.Exists(filePath);
     }
 
-    public bool IsDirectoryExists(string folderPath)
+    public bool IsFolderExists(string folderPath)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
             throw new ArgumentNullException(nameof(folderPath), "Folder path is empty.");
