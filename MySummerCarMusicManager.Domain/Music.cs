@@ -9,6 +9,9 @@ public sealed partial class Music : ObservableObject
     public string[] Authors { get; init; }
     public TimeSpan Duration { get; init; }
     public string Path { get; init; }
+    public string ShownAuthors => Authors is { Length: > 0 }
+        ? string.Join(", ", Authors)
+        : "Unknown Artist";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRenamed))]

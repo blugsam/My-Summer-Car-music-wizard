@@ -1,9 +1,11 @@
 ﻿using MySummerCarMusicManager.Infrastructure.DataAccess;
 
-namespace MySummerCarMusicManager.Application.Music.Get;
+namespace MySummerCarMusicManager.App.Music.Get;
 
 public sealed class GetMusic(IFileSystem fileReader, IMetadataReader metadataReader)
 {
+    private static readonly HashSet<string> _supportedFormats = new(StringComparer.OrdinalIgnoreCase) { ".mp3", ".wav", ".flac", ".m4a", ".aac", ".wma", ".ogg" };
+
     public async Task<List<Domain.Music>> Handle(string folderPath, CancellationToken cancellationToken)
     {
         var files = await LoadTracksFromDisk(folderPath, cancellationToken);
@@ -17,13 +19,17 @@ public sealed class GetMusic(IFileSystem fileReader, IMetadataReader metadataRea
 
     private async Task<List<Domain.Music>> LoadTracksFromDisk(string folderPath, CancellationToken cancellationToken)
     {
-        var files = fileReader.GetFiles(folderPath).ToList();
+        var allFiles = fileReader.GetFiles(folderPath, "*").ToList();
 
-        if (files.Count == 0) return new List<Domain.Music>();
+        var musicFiles = allFiles
+            .Where(path => _supportedFormats.Contains(Path.GetExtension(path)))
+            .ToList();
+
+        if (musicFiles.Count == 0) return new List<Domain.Music>();
 
         return await Task.Run(() =>
         {
-            var rawList = files
+            var rawList = musicFiles
                 .AsParallel()
                 .WithCancellation(cancellationToken)
                 .Select(filePath =>

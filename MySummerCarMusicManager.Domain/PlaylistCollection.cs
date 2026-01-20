@@ -25,4 +25,14 @@ public sealed class PlaylistCollection : ObservableCollection<Music>
             }
         }
     }
+
+    public void RemoveMany(IEnumerable<Music> itemsToRemove)
+    {
+        var list = itemsToRemove.ToList();
+
+        foreach (var item in list)
+        {
+            Remove(item);
+        }
+    }
 }

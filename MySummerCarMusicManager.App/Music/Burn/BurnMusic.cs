@@ -1,7 +1,6 @@
 ﻿using MySummerCarMusicManager.Infrastructure.DataAccess;
-using MySummerCarMusicManager.Infrastructure.Transcoder;
 
-namespace MySummerCarMusicManager.Application.Music.Burn;
+namespace MySummerCarMusicManager.App.Music.Burn;
 
 public sealed class BurnMusic(IAudioTranscoder transcoder, IFileSystem fileSystem)
 {

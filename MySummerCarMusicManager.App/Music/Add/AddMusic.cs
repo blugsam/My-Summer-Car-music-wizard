@@ -1,6 +1,6 @@
 ﻿using MySummerCarMusicManager.Infrastructure.DataAccess;
 
-namespace MySummerCarMusicManager.Application.Music.Add;
+namespace MySummerCarMusicManager.App.Music.Add;
 
 public sealed class AddMusic(IMetadataReader metadataReader)
 {
