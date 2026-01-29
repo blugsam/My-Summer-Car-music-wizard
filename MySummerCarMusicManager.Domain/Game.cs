@@ -25,7 +25,7 @@ public sealed record Game : IDisplayItem
             new("CD3",   "CD3",   "cd")
         };
 
-        return new Game("MSC", "My Summer Car", "msc", playlists);
+        return new Game("MSC", "My Summer Car", "MSC", playlists);
     }
 
     public static Game CreateMyWinterCar()
@@ -38,6 +38,6 @@ public sealed record Game : IDisplayItem
             new("CD3",   "CD3",   "cd")
         };
 
-        return new Game("MWC", "My Winter Car", "mwc", playlists);
+        return new Game("MWC", "My Winter Car", "MWC", playlists);
     }
 }

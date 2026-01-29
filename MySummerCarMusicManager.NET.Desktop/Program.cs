@@ -1,6 +1,6 @@
 ﻿using System;
-
 using Avalonia;
+using Classic.CommonControls;
 
 namespace MySummerCarMusicManager.NET.Desktop;
 
@@ -17,6 +17,7 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .UseMessageBoxSounds()
             .WithInterFont()
             .LogToTrace();
 

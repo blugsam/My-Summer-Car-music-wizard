@@ -14,21 +14,38 @@
     <None Remove="Icons\CD-16.png" />
     <None Remove="Icons\CD-32.png" />
     <None Remove="Icons\Finnish_flag_by_ilyushka88.jpg" />
+    <None Remove="Icons\midi_bl-16.png" />
     <None Remove="Icons\MSC-16.png" />
     <None Remove="Icons\MSC-32.png" />
     <None Remove="Icons\MWC-16.png" />
     <None Remove="Icons\MWC-32.png" />
     <None Remove="Icons\Radio-16.png" />
     <None Remove="Icons\Radio-32.png" />
+    <None Remove="Icons\recycle_bin_empty_cool-16.png" />
+    <None Remove="Icons\recycle_bin_empty_cool-32.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Icons\cassette_tape-16.png" />
+    <AvaloniaResource Include="Icons\cassette_tape-32.png" />
     <AvaloniaResource Include="Icons\cd-16.png" />
     <AvaloniaResource Include="Icons\cd-32.png" />
+    <AvaloniaResource Include="Icons\directory_explorer-16.png" />
+    <AvaloniaResource Include="Icons\directory_explorer-32.png" />
     <AvaloniaResource Include="Icons\Finnish_flag_by_ilyushka88.jpg" />
+    <AvaloniaResource Include="Icons\internet_connection_wiz.png" />
+    <AvaloniaResource Include="Icons\midi_bl-16.png" />
     <AvaloniaResource Include="Icons\MSC-16.png" />
     <AvaloniaResource Include="Icons\MSC-32.png" />
     <AvaloniaResource Include="Icons\MWC-16.png" />
     <AvaloniaResource Include="Icons\MWC-32.png" />
     <AvaloniaResource Include="Icons\radio-16.png" />
     <AvaloniaResource Include="Icons\radio-32.png" />
+    <AvaloniaResource Include="Icons\recycle_bin_empty_cool-16.png" />
+    <AvaloniaResource Include="Icons\recycle_bin_empty_cool-32.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.10" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.10" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.10" />
@@ -45,5 +62,11 @@
     <ProjectReference Include="..\MySummerCarMusicManager.App\MySummerCarMusicManager.App.csproj" />
     <ProjectReference Include="..\MySummerCarMusicManager.Domain\MySummerCarMusicManager.Domain.csproj" />
     <ProjectReference Include="..\MySummerCarMusicManager.Infrastructure\MySummerCarMusicManager.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\EditorView.axaml.cs">
+      <DependentUpon>EditorView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
