@@ -36,157 +36,122 @@ enum ConversionError {
     IoError(String),
 }
 
-struct FileFinder;
+fn load(input: &str) -> Result<(Box<dyn FormatReader>, Track), ConversionError> {
+    let src = match File::open(input) {
+        Ok(file) => file,
+        Err(e) if e.kind() == ErrorKind::NotFound => return Err(ConversionError::FileNotFound(input.to_string())),
+        Err(e) => return Err(ConversionError::IoError(e.to_string())),
+    };
 
-impl FileFinder {
-    fn find(input: &str) -> Result<(), ConversionError> {
-        let input_path = std::path::Path::new(input);
-        if !input_path.exists() {
-            return Err(ConversionError::FileNotFound(input.to_string()));
-        }
-        if !input_path.is_file() {
-           return Err(ConversionError::FileNotFound(format!("Path is not a file: {}", input)));
-        }
+    let mss = MediaSourceStream::new(Box::new(src), Default::default());
 
-        Ok(())
-    }
+    let meta_opts: MetadataOptions = Default::default();
+    let fmt_opts: FormatOptions = Default::default();
+    let hint = Hint::new();
+
+    let probed = match symphonia::default::get_probe().format(&hint, mss, &fmt_opts, &meta_opts) {
+        Ok(p) => p,
+        Err(e) => return Err(ConversionError::UnsupportedFormat(format!("Failed to probe format: {}", e))),
+    };
+
+    let format = probed.format;
+
+    let track = format.tracks()
+        .iter()
+        .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
+        .cloned()
+        .ok_or_else(|| ConversionError::UnsupportedFormat("No supported audio track found.".to_string()))?;
+
+    Ok((format, track))
 }
 
-struct FileLoader;
+fn transcode(track: &Track, mut format: Box<dyn FormatReader>, output_path: &str) -> Result<(), ConversionError> {
+    let dec_opts: DecoderOptions = Default::default();
 
-impl FileLoader {
-    fn load(input: &str) -> Result<(Box<dyn FormatReader>, Track), ConversionError> {
-        let src_result = std::fs::File::open(input);
-        let src = match src_result {
-            Ok(file) => file,
-            Err(error) => return Err(ConversionError::IoError(error.to_string()))
-        };
+    let mut decoder = match symphonia::default::get_codecs().make(&track.codec_params, &dec_opts) {
+        Ok(d) => d,
+        Err(e) => return Err(ConversionError::DecodeError(format!("Failed to create decoder: {}", e))),
+    };
+    
+    let track_id = track.id;
 
-        let mss = MediaSourceStream::new(Box::new(src), Default::default());
+    let codec_params = &track.codec_params;
+    let sample_rate = codec_params.sample_rate.ok_or(ConversionError::UnsupportedFormat("Unknown sample rate".to_string()))?;
+    let channels = codec_params.channels.ok_or(ConversionError::UnsupportedFormat("Unknown channel count".to_string()))?.count();
 
-        let meta_opts: MetadataOptions = Default::default();
-        let fmt_opts: FormatOptions = Default::default();
+    let output_file = match File::create(output_path) {
+        Ok(f) => f,
+        Err(e) => return Err(ConversionError::IoError(format!("Failed to create output file: {}", e))),
+    };
 
-        let hint = Hint::new();
+    let safe_sample_rate = std::num::NonZeroU32::new(sample_rate)
+        .ok_or_else(|| ConversionError::UnsupportedFormat("Sample rate is zero".to_string()))?;
+    
+    let safe_channels = std::num::NonZeroU8::new(channels as u8)
+        .ok_or_else(|| ConversionError::UnsupportedFormat("Channel count is zero".to_string()))?;
 
-        let probed_result = symphonia::default::get_probe().format(&hint, mss, &fmt_opts, &meta_opts);
-        let probed = match probed_result {
-            Ok(probed_result) => probed_result,
-            Err(error) => return Err(ConversionError::UnsupportedFormat(error.to_string()))
-        };
-
-        let format = probed.format;
-
-        let track = format.tracks()
-            .iter()
-            .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
-            .cloned()
-            .ok_or_else(|| ConversionError::UnsupportedFormat("Hasn't found proper track.".to_string()))?;
-
-        Ok((format, track))
-
-    }
-
-}
-
-struct FileTranscoder;
-
-impl FileTranscoder {
-    fn transcode(track: &Track, mut format: Box<dyn FormatReader>, output_path: &str) -> Result<(), ConversionError> {
-        let dec_opts: DecoderOptions = Default::default();
-
-        let decoder_result = symphonia::default::get_codecs().make(&track.codec_params, &dec_opts);
-        let mut decoder = match decoder_result {
-            Ok(decoder_result) => decoder_result,
-            Err(error) => return Err(ConversionError::DecodeError(error.to_string()))
-        };
-        
-        let track_id = track.id;
-
-        let codec_params = &track.codec_params;
-        let sample_rate = codec_params.sample_rate.ok_or(ConversionError::UnsupportedFormat("Unknown sample rate".to_string()))?;
-        let channels = codec_params.channels.ok_or(ConversionError::UnsupportedFormat("Unknown channel count".to_string()))?.count();
-
-        let output_file_result = File::create(output_path);
-        let output_file = match output_file_result {
-            Ok(output_file_result) => output_file_result,
-            Err(error) => return Err(ConversionError::IoError(error.to_string()))
-        };
-
-        let mut encoder = VorbisEncoderBuilder::new(
-            std::num::NonZeroU32::new(sample_rate).unwrap(),
-            std::num::NonZeroU8::new(channels as u8).unwrap(),
-            output_file
-        )
+    let mut encoder = VorbisEncoderBuilder::new(safe_sample_rate, safe_channels, output_file)
         .map_err(|e| ConversionError::SystemError(format!("Vorbis init failed: {:?}", e)))?
         .build()
         .map_err(|e| ConversionError::SystemError(format!("Vorbis build failed: {:?}", e)))?;
 
-        let mut conversion_buf: Option<AudioBuffer<f32>> = None;
+    let mut conversion_buf: Option<AudioBuffer<f32>> = None;
 
-        loop {
-            let packet = match format.next_packet() {
-                Ok(packet) => packet,
-                Err(Error::IoError(e)) if e.kind() == ErrorKind::UnexpectedEof => {
-                    break; // leave the cycle if file is gone
-                }
-                Err(Error::ResetRequired) => {
-                    break;
-                }
-                Err(err) => {
-                    return Err(ConversionError::DecodeError(err.to_string()))
-                }
-            };
-
-            while !format.metadata().is_latest() {
-                format.metadata().pop();
+    loop {
+        let packet = match format.next_packet() {
+            Ok(packet) => packet,
+            Err(Error::IoError(e)) if e.kind() == ErrorKind::UnexpectedEof => {
+                break; // leave the cycle if file is gone
             }
-
-            if packet.track_id() != track_id {
-                continue;
+            Err(Error::ResetRequired) => {
+                break;
             }
-
-            match decoder.decode(&packet) {
-                Ok(decoded) => {
-                    if conversion_buf.is_none() {
-                        let spec = *decoded.spec();
-                        let duration = decoded.capacity() as u64;
-                        conversion_buf = Some(AudioBuffer::<f32>::new(duration, spec));
-                    }
-
-                    if let Some(buf) = &mut conversion_buf {
-                        buf.clear();
-                        decoded.convert(buf);
-                        let planes = buf.planes();
-                        let plane_slices = planes.planes();
-
-                        encoder.encode_audio_block(plane_slices)
-                            .map_err(|e| ConversionError::EncodeError(format!("{:?}", e)))?;
-                    }
-                }
-                Err(Error::IoError(_)) => {
-                    continue;
-                }
-                Err(Error::DecodeError(_)) => {
-                    continue;
-                }
-                Err(err) => {
-                    return Err(ConversionError::DecodeError(err.to_string()))
-                }
+            Err(err) => {
+                return Err(ConversionError::DecodeError(err.to_string()))
             }
+        };
+
+        while !format.metadata().is_latest() {
+            format.metadata().pop();
         }
 
-        encoder.finish().map_err(|e| ConversionError::EncodeError(format!("{:?}", e)))?;
+        if packet.track_id() != track_id {
+            continue;
+        }
 
-        Ok(())
+        match decoder.decode(&packet) {
+            Ok(decoded) => {
+                if conversion_buf.is_none() {
+                    let spec = *decoded.spec();
+                    let duration = decoded.capacity() as u64;
+                    conversion_buf = Some(AudioBuffer::<f32>::new(duration, spec));
+                }
+
+                if let Some(buf) = &mut conversion_buf {
+                    buf.clear();
+                    decoded.convert(buf);
+                    let planes = buf.planes();
+                    let plane_slices = planes.planes();
+
+                    encoder.encode_audio_block(plane_slices)
+                        .map_err(|e| ConversionError::EncodeError(format!("{:?}", e)))?;
+                }
+            }
+            Err(Error::IoError(_)) => continue,
+            Err(Error::DecodeError(_)) => continue,
+            Err(err) => return Err(ConversionError::DecodeError(err.to_string()))
+        }
     }
 
-    fn perform_pipeline(input: &str, output: &str) -> Result<(), ConversionError> {
-        FileFinder::find(input)?;
-        let (reader, track) = FileLoader::load(input)?;
-        FileTranscoder::transcode(&track, reader, output)?;
-        Ok(())
-    }
+    encoder.finish().map_err(|e| ConversionError::EncodeError(format!("{:?}", e)))?;
+
+    Ok(())
+}
+
+fn perform_pipeline(input: &str, output: &str) -> Result<(), ConversionError> {
+    let (reader, track) = load(input)?;
+    transcode(&track, reader, output)?;
+    Ok(())
 }
 
 #[unsafe(no_mangle)]
@@ -212,7 +177,7 @@ extern "C" fn convert_audio_to_ogg(input: *const c_char, output: *const c_char) 
         }
     };
 
-    match FileTranscoder::perform_pipeline(input_str, output_str) {
+    match perform_pipeline(input_str, output_str) {
         Ok(_) => FfiMessage::ok(),
         Err(e) => {
             let error_msg = match e {
@@ -246,33 +211,12 @@ mod tests {
     use std::path::{PathBuf};
 
     #[test]
-    fn test_file_finding_on_success() {
-        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        path.push("misc");
-        path.push("Erkki Armas Hokkanen Ad.flac");
-
-        let result = FileFinder::find(path.to_str().unwrap());
-        
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_file_finding_on_failure() {
-        let result = FileFinder::find("perkele/suomi.flac");
-
-        assert!(
-            matches!(result, Err(ConversionError::FileNotFound(_))),
-            "Expected a FileNotFound error, but got {:?}", result
-        );
-    }
-
-    #[test]
     fn test_file_loading_on_success() {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push("misc");
         path.push("Erkki Armas Hokkanen Ad.flac");
 
-        let result = FileLoader::load(path.to_str().unwrap());
+        let result = load(path.to_str().unwrap());
 
         match result {
             Ok((_reader, _track)) => {}
@@ -293,7 +237,7 @@ mod tests {
             fs::remove_file(&output_path).unwrap();
         }
 
-        match FileTranscoder::perform_pipeline(input_path.to_str().unwrap(), output_path.to_str().unwrap()) {
+        match perform_pipeline(input_path.to_str().unwrap(), output_path.to_str().unwrap()) {
             Ok(()) => {},
             Err(e) => panic!("Error during transcoding: {:?}", e)
         }
