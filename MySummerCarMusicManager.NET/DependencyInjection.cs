@@ -11,7 +11,7 @@ public static class DependencyInjection
         services.AddSingleton<MainViewModel>();
         services.AddTransient<LauncherViewModel>();
 
-        //services.AddSingleton<Func<string, EditorViewModel>>(provider => (folderPath) => ActivatorUtilities.CreateInstance<EditorViewModel>(provider, folderPath));
+        services.AddSingleton<Func<string, EditorViewModel>>(provider => (folderPath) => ActivatorUtilities.CreateInstance<EditorViewModel>(provider, folderPath));
 
         return services;
     }
