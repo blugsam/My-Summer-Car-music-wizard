@@ -1,4 +1,4 @@
-use std::{ffi::{CString, c_char, CStr}, fs::File, io::ErrorKind, ptr::null_mut};
+use std::{ffi::{CString, c_char, CStr}, fs::File, io::ErrorKind, ptr::null_mut, path::Path};
 use symphonia::core::{audio::Signal, errors::Error};
 use symphonia::core::{formats::{FormatOptions, Track}};
 use symphonia::core::io::MediaSourceStream;
@@ -47,7 +47,11 @@ fn load(input: &str) -> Result<(Box<dyn FormatReader>, Track), ConversionError> 
 
     let meta_opts: MetadataOptions = Default::default();
     let fmt_opts: FormatOptions = Default::default();
-    let hint = Hint::new();
+    let mut hint = Hint::new();
+
+    if let Some(extension) = Path::new(input).extension().and_then(|e| e.to_str()) {
+        hint.with_extension(extension);
+    }
 
     let probed = match symphonia::default::get_probe().format(&hint, mss, &fmt_opts, &meta_opts) {
         Ok(p) => p,
@@ -210,31 +214,39 @@ mod tests {
     use std::fs;
     use std::path::{PathBuf};
 
-    #[test]
-    fn test_file_loading_on_success() {
+    fn get_test_resource(filename: &str) -> PathBuf {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push("misc");
-        path.push("Erkki Armas Hokkanen Ad.flac");
-
-        let result = load(path.to_str().unwrap());
-
-        match result {
-            Ok((_reader, _track)) => {}
-            Err(e) => panic!("FileLoader doesn't load a file: {:?}", e)
-        }
+        path.push(filename);
+        path
     }
 
     #[test]
-    fn test_transcoding_pipeline() {
-        let mut input_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        input_path.push("misc");
-        input_path.push("Erkki Armas Hokkanen Ad.flac");
+    fn load_single_flac_file() -> Result<(), Box<dyn std::error::Error>> {
+        let path = get_test_resource("Erkki Armas Hokkanen Ad.flac");
+        
+        let (_reader, _track) = load(path.to_str().unwrap())
+            .expect("FileLoader failed to load flac");
 
-        let mut output_path = std::env::temp_dir();
-        output_path.push("output_test.ogg");
+        Ok(())
+    }
+
+    #[test]
+    fn load_single_wav_file() -> Result<(), Box<dyn std::error::Error>> {
+        let path = get_test_resource("administrator.wav");
+
+        let (_reader, _track) = load(path.to_str().unwrap())
+            .expect("FileLoader failed to load wav");
+
+        Ok(())
+    }
+
+    fn transcode(input_file: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let input_path = get_test_resource(input_file);
+        let output_path = std::env::temp_dir().join("output_test.ogg");
 
         if output_path.exists() {
-            fs::remove_file(&output_path).unwrap();
+            fs::remove_file(&output_path)?;
         }
 
         match perform_pipeline(input_path.to_str().unwrap(), output_path.to_str().unwrap()) {
@@ -242,12 +254,20 @@ mod tests {
             Err(e) => panic!("Error during transcoding: {:?}", e)
         }
 
-        match fs::metadata(&output_path) {
-            Ok(m) if m.len() > 0 => {}
-            Ok(_) => {
-                panic!("File exists but he is empty.");
-            },
-            Err(_) => panic!("Output file not found after transcoding.")
-        }
+        assert!(output_path.exists(), "Output file should exist");
+        let meta = fs::metadata(&output_path)?;
+        assert!(meta.len() > 0, "Output file should not be empty");
+
+        Ok(())
+    }
+
+    #[test]
+    fn transcode_flac() -> Result<(), Box<dyn std::error::Error>> {
+        transcode("Erkki Armas Hokkanen Ad.flac")
+    }
+
+    #[test]
+    fn transcode_wav() -> Result<(), Box<dyn std::error::Error>> {
+        transcode("administrator.wav")
     }
 }
