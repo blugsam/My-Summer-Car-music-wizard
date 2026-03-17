@@ -1,9 +1,8 @@
 ﻿using MySummerCarMusicManager.Domain;
 
-namespace MySummerCarMusicManager.App.Games
+namespace MySummerCarMusicManager.App.Games;
+
+public interface IGameCatalog
 {
-    public interface IGameCatalog
-    {
-        IEnumerable<Game> GetSupportedGames();
-    }
+    IEnumerable<Game> GetSupportedGames();
 }

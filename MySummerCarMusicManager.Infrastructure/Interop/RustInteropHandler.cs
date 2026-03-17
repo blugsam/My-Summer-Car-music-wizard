@@ -15,6 +15,9 @@ internal sealed partial class RustInteropHandler : IRustInteropHandler
 
     public void HandleConvert(string inputPath, string outputPath)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(inputPath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
+
         var result = ConvertAudioToOgg(inputPath, outputPath);
 
         if (!result.IsSuccess) HandleError(result);
@@ -28,7 +31,7 @@ internal sealed partial class RustInteropHandler : IRustInteropHandler
         {
             if (result.ErrorMessage != IntPtr.Zero)
             {
-                errorMessage = Marshal.PtrToStringUTF8(result.ErrorMessage);
+                errorMessage = Marshal.PtrToStringUTF8(result.ErrorMessage) ?? errorMessage;
             }
         }
         finally
@@ -39,6 +42,6 @@ internal sealed partial class RustInteropHandler : IRustInteropHandler
             }
         }
 
-        throw new ApplicationException($"Transcoding error: {errorMessage}");
+        throw new InvalidOperationException($"Transcoding error: {errorMessage}");
     }
 }

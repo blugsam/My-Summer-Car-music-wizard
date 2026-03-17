@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Globalization;
-using System.Reflection;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
 namespace MySummerCarMusicManager.NET.Helpers;
 
-public class AssetBitmapConverter : IValueConverter
+public sealed class AssetBitmapConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

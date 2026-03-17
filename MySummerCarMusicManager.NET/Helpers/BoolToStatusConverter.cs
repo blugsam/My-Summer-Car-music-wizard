@@ -4,7 +4,7 @@ using Avalonia.Data.Converters;
 
 namespace MySummerCarMusicManager.NET.Helpers;
 
-public class BoolToStatusConverter : IValueConverter
+public sealed class BoolToStatusConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
