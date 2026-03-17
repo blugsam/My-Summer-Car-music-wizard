@@ -69,17 +69,4 @@
       <DependentUpon>EditorView.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
-
-  <Target Name="BuildRustLibrary" BeforeTargets="BeforeBuild">
-    <Exec Command="cargo build --release --lib --manifest-path &quot;$(MSBuildProjectDirectory)\..\MySummerCarMusicManagerDecodeRs\Cargo.toml&quot;"
-          StandardOutputImportance="high" />
-
-    <ItemGroup>
-      <NativeLib Include="$(MSBuildProjectDirectory)\..\MySummerCarMusicManagerDecodeRs\target\release\decode_rs.dll" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(NativeLib)"
-          DestinationFolder="$(OutDir)"
-          SkipUnchangedFiles="true" />
-  </Target>
 </Project>

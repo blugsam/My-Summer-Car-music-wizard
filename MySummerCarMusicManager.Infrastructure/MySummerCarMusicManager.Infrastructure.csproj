@@ -12,4 +12,20 @@
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 
+  <Target Name="BuildRustLibrary" BeforeTargets="BeforeBuild">
+    <Exec Command="cargo build --release --lib --manifest-path &quot;$(MSBuildProjectDirectory)\..\MySummerCarMusicManagerDecodeRs\Cargo.toml&quot;"
+          StandardOutputImportance="high" />
+    <Message Importance="high" Text="--- Rust Libraries Built ---" />
+  </Target>
+
+  <Target Name="IncludeRustLibrary" AfterTargets="BuildRustLibrary" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <None Include="$(MSBuildProjectDirectory)\..\MySummerCarMusicManagerDecodeRs\target\release\decode_rs.dll">
+        <Link>decode_rs.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+    <Message Importance="high" Text="--- Rust Library Injected into MSBuild Pipeline ---" />
+  </Target>
+
 </Project>
