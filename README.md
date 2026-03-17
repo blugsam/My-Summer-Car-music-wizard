@@ -31,4 +31,4 @@ I made this cuz i wanted to research how to transcode audio locally and also try
 <img width="350" height="284" alt="image" src="https://github.com/user-attachments/assets/4bec1d3c-f920-4eac-83e2-2860c09c2dce" />
 
 ## License
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See `MIT license` for more information.
