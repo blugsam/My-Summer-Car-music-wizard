@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MySummerCarMusicManager.Infrastructure.DataAccess;
 using MySummerCarMusicManager.Infrastructure.Interop;
-using MySummerCarMusicManager.NET.Interop;
 
 namespace MySummerCarMusicManager.Infrastructure;
 

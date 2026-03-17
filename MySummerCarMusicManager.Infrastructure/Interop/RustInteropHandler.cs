@@ -1,9 +1,8 @@
 ﻿using System.Runtime.InteropServices;
-using MySummerCarMusicManager.Infrastructure.Interop;
 
-namespace MySummerCarMusicManager.NET.Interop;
+namespace MySummerCarMusicManager.Infrastructure.Interop;
 
-internal sealed partial class RustInteropHandler : IRustInteropHandler
+public sealed partial class RustInteropHandler : IRustInteropHandler
 {
     private const string DLL_NAME = "decode_rs.dll";
 
